@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import OneHotEncoder
 
 # Definição de uma SEED padrão:
 
@@ -92,4 +93,12 @@ projection['cluster_pca'] = kmeans_pca.predict(projection)
 projection['genres'] = dados_generos['genres']
 
 fig = px.scatter(projection, x='x', y='y', color='cluster_pca', hover_data=['x', 'y', 'genres'])
-fig.show()
+# fig.show()
+
+# Dummie dos dados
+ohe = OneHotEncoder(dtype=int)
+colunas_ohe = ohe.fit_transform(dados[['artists']]).toarray()
+dados_drop = dados.drop('artists', axis=1)
+
+dados_dummies = pd.concat([dados_drop, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
+print(dados_dummies)
