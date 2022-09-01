@@ -12,4 +12,3 @@ dados_generos = pd.read_csv('Data/data_by_genres.csv')
 dados_anos = pd.read_csv('Data/data_by_year.csv')
 
 print(dados_generos.head())
-Import de dados
