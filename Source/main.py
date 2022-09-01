@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 
 # Definição de uma SEED padrão:
 
@@ -71,13 +72,24 @@ fig = px.imshow(dados.corr(), text_auto=True)
 
 # fig.show()
 
-# Clusterização dos gêneros:
 
 # Pipeline
-pca_pipeline = Pipeline(['scaler', StandardScaler(), ('PCA', PCA(n_components=2, random_state=SEED))])
+pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=2, random_state=SEED))])
 
 # Treino de pipeline
 genre_embedding_pca = pca_pipeline.fit_transform(dados_generos_sem_genres)
 
 # Salvar os eixos X - Y
 projection = pd.DataFrame(columns=['x', 'y'], data=genre_embedding_pca)
+
+# Clusterização dos gêneros:
+kmeans_pca = KMeans(n_clusters=10, verbose=False, random_state=SEED)
+kmeans_pca.fit(projection)
+
+dados_generos['cluster_pca'] = kmeans_pca.predict(projection)
+projection['cluster_pca'] = kmeans_pca.predict(projection)
+
+projection['genres'] = dados_generos['genres']
+
+fig = px.scatter(projection, x='x', y='y', color='cluster_pca', hover_data=['x', 'y', 'genres'])
+fig.show()
