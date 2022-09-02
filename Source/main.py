@@ -12,21 +12,28 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import OneHotEncoder
 
+from pandas.core.dtypes.cast import maybe_upcast
+from sklearn.metrics.pairwise import euclidean_distances
+
 # Definição de uma SEED padrão:
 
 SEED = 1224
 np.random.seed(1224)
 
+# Declaração de variável:
+
+nome_musica = 'Juice WRLD - Bandit ft. NBA Youngboy'
+
 #Leitura dos CSV utilizando Pandas:
 
 # Dados totais / brutos
-dados = pd.read_csv('Data/data.csv')
+dados = pd.read_csv('https://raw.githubusercontent.com/sthemonica/music-clustering/main/Dados/Dados_totais.csv')
 
 # Dados separados por genêros musicais
-dados_generos = pd.read_csv('Data/data_by_genres.csv')
+dados_generos = pd.read_csv('https://raw.githubusercontent.com/sthemonica/music-clustering/main/Dados/data_by_genres.csv')
 
 # Dados separados por ano de lançamento da música
-dados_anos = pd.read_csv('Data/data_by_year.csv')
+dados_anos = pd.read_csv('https://raw.githubusercontent.com/sthemonica/music-clustering/main/Dados/data_by_year.csv')
 
 #Tratamentos das variáveis:
 
@@ -55,21 +62,21 @@ fig = px.line(dados_anos, x='year', y='loudness', markers=True, title='Variaçã
 fig = go.Figure()
 
 #Adição das Variáveis que serão analisadas
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['acousticness'], name='Acousticness'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['acousticness'], name='Acousticness'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['valence'], name='Valence'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['valence'], name='Valence'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['danceability'], name='Danceability'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['danceability'], name='Danceability'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['energy'], name='Energy'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['energy'], name='Energy'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['instrumentalness'], name='Instrumentalness'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['instrumentalness'], name='Instrumentalness'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['liveness'], name='Liveness'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['liveness'], name='Liveness'))
 
-fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['speechiness'], name='Speechiness'))
+# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['speechiness'], name='Speechiness'))
 
-fig = px.imshow(dados.corr(), text_auto=True)
+# fig = px.imshow(dados.corr(), text_auto=True)
 
 # fig.show()
 
@@ -90,15 +97,44 @@ kmeans_pca.fit(projection)
 dados_generos['cluster_pca'] = kmeans_pca.predict(projection)
 projection['cluster_pca'] = kmeans_pca.predict(projection)
 
-projection['genres'] = dados_generos['genres']
+projection['generos'] = dados_generos['genres']
 
-fig = px.scatter(projection, x='x', y='y', color='cluster_pca', hover_data=['x', 'y', 'genres'])
+# fig = px.scatter_3d(projection, x=0, y=1, z=2, color='cluster_pca',hover_data=['song'])
+# fig.update_traces(marker_size = 2)
 # fig.show()
 
 # Dummie dos dados
 ohe = OneHotEncoder(dtype=int)
 colunas_ohe = ohe.fit_transform(dados[['artists']]).toarray()
-dados2 = dados.drop('artists', axis = 1)
+dados2 = dados.drop('artists', axis=1)
 
-dados_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
-print(dados_dummies)
+dados_musicas_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
+
+pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=0.7, random_state=SEED))])
+
+music_embedding_pca = pca_pipeline.fit_transform(dados_musicas_dummies.drop(['id','name','artists_song'], axis=1))
+projection_m = pd.DataFrame(data=music_embedding_pca)
+
+kmeans_pca_pipeline = KMeans(n_clusters=50, verbose=False, random_state=SEED)
+
+kmeans_pca_pipeline.fit(projection_m)
+
+dados['cluster_pca'] = kmeans_pca_pipeline.predict(projection_m)
+projection_m['cluster_pca'] = kmeans_pca_pipeline.predict(projection_m)
+projection_m['artist'] = dados['artists']
+projection_m['song'] = dados['artists_song']
+
+fig = px.scatter(projection_m, x=0, y=1, color='cluster_pca', hover_data=[0, 1, 'song'])
+# fig.show()
+
+cluster = list(projection_m[projection_m['song']== nome_musica]['cluster_pca'])[0]
+musicas_recomendadas = projection_m[projection_m['cluster_pca']== cluster][[0, 1, 'song']]
+x_musica = list(projection_m[projection_m['song']== nome_musica][0])[0]
+y_musica = list(projection_m[projection_m['song']== nome_musica][1])[0]
+
+# distâncias euclidianas
+# distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_musica]])
+# musicas_recomendadas['id'] = dados['id']
+# musicas_recomendadas['distancias']= distancias
+# recomendada = musicas_recomendadas.sort_values('distancias').head(10)
+# print(recomendada)
