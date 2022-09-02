@@ -101,3 +101,4 @@ colunas_ohe = ohe.fit_transform(dados[['artists']]).toarray()
 dados2 = dados.drop('artists', axis = 1)
 
 dados_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
+print(dados_dummies)
