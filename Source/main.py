@@ -77,7 +77,7 @@ fig = px.imshow(dados.corr(), text_auto=True)
 # Pipeline
 pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=2, random_state=SEED))])
 
-# Treino de pipeline
+# Treino de pipeline GENÊRO
 genre_embedding_pca = pca_pipeline.fit_transform(dados_generos_sem_genres)
 
 # Salvar os eixos X - Y
@@ -98,7 +98,6 @@ fig = px.scatter(projection, x='x', y='y', color='cluster_pca', hover_data=['x',
 # Dummie dos dados
 ohe = OneHotEncoder(dtype=int)
 colunas_ohe = ohe.fit_transform(dados[['artists']]).toarray()
-dados_drop = dados.drop('artists', axis=1)
+dados2 = dados.drop('artists', axis = 1)
 
-dados_dummies = pd.concat([dados_drop, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
-print(dados_dummies)
+dados_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
