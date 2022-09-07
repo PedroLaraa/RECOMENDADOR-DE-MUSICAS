@@ -127,6 +127,7 @@ projection_m['song'] = dados['artists_song']
 fig = px.scatter(projection_m, x=0, y=1, color='cluster_pca', hover_data=[0, 1, 'song'])
 # fig.show()
 
+
 cluster = list(projection_m[projection_m['song']== nome_musica]['cluster_pca'])[0]
 musicas_recomendadas = projection_m[projection_m['cluster_pca']== cluster][[0, 1, 'song']]
 x_musica = list(projection_m[projection_m['song']== nome_musica][0])[0]
