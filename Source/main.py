@@ -110,6 +110,8 @@ dados2 = dados.drop('artists', axis=1)
 
 dados_musicas_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
 
+dados_musicas_dummies.shape
+
 pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=0.7, random_state=SEED))])
 
 music_embedding_pca = pca_pipeline.fit_transform(dados_musicas_dummies.drop(['id','name','artists_song'], axis=1))
@@ -133,9 +135,8 @@ musicas_recomendadas = projection_m[projection_m['cluster_pca']== cluster][[0, 1
 x_musica = list(projection_m[projection_m['song']== nome_musica][0])[0]
 y_musica = list(projection_m[projection_m['song']== nome_musica][1])[0]
 
-# distâncias euclidianas
-# distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_musica]])
-# musicas_recomendadas['id'] = dados['id']
-# musicas_recomendadas['distancias']= distancias
-# recomendada = musicas_recomendadas.sort_values('distancias').head(10)
-# print(recomendada)
+distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_musica]])
+musicas_recomendadas['id'] = dados['id']
+musicas_recomendadas['distancias']= distancias
+recomendada = musicas_recomendadas.sort_values('distancias').head(10)
+print(recomendada)
