@@ -133,11 +133,10 @@ print(recomendada)
 
 scope = 'user-library-read playlist-modify-private'
 OAuth = SpotifyOAuth(
-    scope=scope,
-    redirect_uri='http://localhost:5000/callback',
-    client_id='64bfebcef50c4786929c82637f1c89ff',
-    client_secret='b3ecdf49d72a484b8e8053ffed3d3160'
-)
+        scope=scope,
+        redirect_uri='http://localhost:5000/callback',
+        client_id='64bfebcef50c4786929c82637f1c89ff',
+        client_secret='b3ecdf49d72a484b8e8053ffed3d3160')
 
 client_credentials_manager = SpotifyClientCredentials(client_id = '64bfebcef50c4786929c82637f1c89ff', client_secret = 'b3ecdf49d72a484b8e8053ffed3d3160')
 sp = spotipy.Spotify(client_credentials_manager= client_credentials_manager)
