@@ -1,5 +1,6 @@
 #Imports necessários:
 
+from email.mime import image
 from http import client
 import pandas as pd
 import numpy as np
@@ -30,7 +31,7 @@ np.random.seed(1224)
 
 # Declaração de variável:
 
-nome_musica = 'Juice WRLD - Bandit ft. NBA Youngboy'
+nome_musica = 'The Kid LAROI - WRONG (feat. Lil Mosey)'
 
 #Leitura dos CSV utilizando Pandas:
 
@@ -128,7 +129,7 @@ distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_mus
 musicas_recomendadas['id'] = dados['id']
 musicas_recomendadas['distancias']= distancias
 recomendada = musicas_recomendadas.sort_values('distancias').head(10)
-# print(recomendada)
+print(recomendada)
 
 scope = 'user-library-read playlist-modify-private'
 OAuth = SpotifyOAuth(
@@ -141,4 +142,27 @@ OAuth = SpotifyOAuth(
 client_credentials_manager = SpotifyClientCredentials(client_id = '64bfebcef50c4786929c82637f1c89ff', client_secret = 'b3ecdf49d72a484b8e8053ffed3d3160')
 sp = spotipy.Spotify(client_credentials_manager= client_credentials_manager)
 
+id = dados[dados['artists_song'] == nome_musica]['id'].iloc[0]
+track = sp.track(id)
+url = track['album']['images'][1]['url']
+name = track['name']
+image = io.imread(url)
 
+plt.imshow(image)
+plt.xlabel(name, fontsize = 10)
+# plt.show()
+
+def recommend_id(playlist_id):
+    url = []
+    name = []
+    artists = []
+    duration = []
+    for i in playlist_id:
+        track = sp.track(i)
+        url.append(track['album']['images'][1]['url'])
+        name.append(track['name'])
+        artists.append(track['artists'][0]['name'])
+        duration.append(round(track['duration_ms']/60000, 2))
+    return name,url, artists, duration
+
+print(recommend_id(recomendada['id']))
