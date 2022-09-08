@@ -1,5 +1,6 @@
 #Imports necessários:
 
+from http import client
 import pandas as pd
 import numpy as np
 
@@ -15,6 +16,13 @@ from sklearn.preprocessing import OneHotEncoder
 from pandas.core.dtypes.cast import maybe_upcast
 from sklearn.metrics.pairwise import euclidean_distances
 
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import  SpotifyClientCredentials
+
+import matplotlib.pyplot as plt
+from skimage import io
+
 # Definição de uma SEED padrão:
 
 SEED = 1224
@@ -22,7 +30,7 @@ np.random.seed(1224)
 
 # Declaração de variável:
 
-nome_musica = 'Ed Sheeran – Shape of You'
+nome_musica = 'Juice WRLD - Bandit ft. NBA Youngboy'
 
 #Leitura dos CSV utilizando Pandas:
 
@@ -71,7 +79,7 @@ genre_embedding_pca = pca_pipeline.fit_transform(dados_generos_sem_genres)
 projection = pd.DataFrame(columns=['x', 'y'], data=genre_embedding_pca)
 
 # Clusterização dos gêneros:
-kmeans_pca = KMeans(n_clusters=10, verbose=False, random_state=SEED)
+kmeans_pca = KMeans(n_clusters=5, verbose=True, random_state=SEED)
 kmeans_pca.fit(projection)
 
 dados_generos['cluster_pca'] = kmeans_pca.predict(projection)
@@ -90,7 +98,8 @@ dados2 = dados.drop('artists', axis=1)
 
 dados_musicas_dummies = pd.concat([dados2, pd.DataFrame(colunas_ohe, columns=ohe.get_feature_names_out(['artists']))], axis=1)
 
-dados_musicas_dummies.shape
+# dados.shape
+# dados_musicas_dummies.shape
 
 pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=0.7, random_state=SEED))])
 
@@ -119,4 +128,17 @@ distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_mus
 musicas_recomendadas['id'] = dados['id']
 musicas_recomendadas['distancias']= distancias
 recomendada = musicas_recomendadas.sort_values('distancias').head(10)
-print(recomendada)
+# print(recomendada)
+
+scope = 'user-library-read playlist-modify-private'
+OAuth = SpotifyOAuth(
+    scope=scope,
+    redirect_uri='http://localhost:5000/callback',
+    client_id='64bfebcef50c4786929c82637f1c89ff',
+    client_secret='b3ecdf49d72a484b8e8053ffed3d3160'
+)
+
+client_credentials_manager = SpotifyClientCredentials(client_id = '64bfebcef50c4786929c82637f1c89ff', client_secret = 'b3ecdf49d72a484b8e8053ffed3d3160')
+sp = spotipy.Spotify(client_credentials_manager= client_credentials_manager)
+
+
