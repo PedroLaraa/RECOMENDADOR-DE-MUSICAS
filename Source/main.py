@@ -22,7 +22,7 @@ np.random.seed(1224)
 
 # Declaração de variável:
 
-nome_musica = 'Juice WRLD - Bandit ft. NBA Youngboy'
+nome_musica = 'Ed Sheeran – Shape of You'
 
 #Leitura dos CSV utilizando Pandas:
 
@@ -60,26 +60,6 @@ fig = px.line(dados_anos, x='year', y='loudness', markers=True, title='Variaçã
 
 # Análise das Variáveis x Anos com PLOTLY GRAPH OBJECTS:
 fig = go.Figure()
-
-#Adição das Variáveis que serão analisadas
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['acousticness'], name='Acousticness'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['valence'], name='Valence'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['danceability'], name='Danceability'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['energy'], name='Energy'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['instrumentalness'], name='Instrumentalness'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['liveness'], name='Liveness'))
-
-# fig.add_trace(go.Scatter(x=dados_anos['year'], y=dados_anos['speechiness'], name='Speechiness'))
-
-# fig = px.imshow(dados.corr(), text_auto=True)
-
-# fig.show()
-
 
 # Pipeline
 pca_pipeline = Pipeline([('scaler', StandardScaler()), ('PCA', PCA(n_components=2, random_state=SEED))])
@@ -129,12 +109,12 @@ projection_m['song'] = dados['artists_song']
 fig = px.scatter(projection_m, x=0, y=1, color='cluster_pca', hover_data=[0, 1, 'song'])
 # fig.show()
 
-
 cluster = list(projection_m[projection_m['song']== nome_musica]['cluster_pca'])[0]
 musicas_recomendadas = projection_m[projection_m['cluster_pca']== cluster][[0, 1, 'song']]
 x_musica = list(projection_m[projection_m['song']== nome_musica][0])[0]
 y_musica = list(projection_m[projection_m['song']== nome_musica][1])[0]
 
+#distâncias euclidianas
 distancias = euclidean_distances(musicas_recomendadas[[0, 1]], [[x_musica, y_musica]])
 musicas_recomendadas['id'] = dados['id']
 musicas_recomendadas['distancias']= distancias
